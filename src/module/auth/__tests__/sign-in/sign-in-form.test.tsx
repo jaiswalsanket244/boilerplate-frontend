@@ -280,6 +280,57 @@ describe("SignInForm Template", () => {
 		});
 	});
 
+	it("shows a form-level message when the account is temporarily locked", async () => {
+		const fakeError = {
+			response: {
+				data: {
+					messageCode: "ACCOUNT_LOCKED",
+					message: "Too many failed attempts. This account is temporarily locked. Please try again later.",
+				},
+			},
+		};
+
+		mutateMock.mockImplementation((_payload, { onError }) => {
+			onError(fakeError);
+		});
+
+		renderComponent();
+
+		await submitForm(user, "user@x.test", "wrong");
+
+		await waitFor(() => {
+			expect(screen.getByTestId("signin-form-error")).toHaveTextContent(/temporarily locked/i);
+		});
+
+		// The reset link stays visible so a locked user can recover.
+		expect(screen.getByRole("link", { name: /reset password/i })).toBeInTheDocument();
+	});
+
+	it("shows a reset-required message when the account is terminally locked", async () => {
+		const fakeError = {
+			response: {
+				data: {
+					messageCode: "ACCOUNT_LOCKED_RESET_REQUIRED",
+					message: "Too many failed attempts. This account is locked — reset your password to regain access.",
+				},
+			},
+		};
+
+		mutateMock.mockImplementation((_payload, { onError }) => {
+			onError(fakeError);
+		});
+
+		renderComponent();
+
+		await submitForm(user, "user@x.test", "wrong");
+
+		await waitFor(() => {
+			expect(screen.getByTestId("signin-form-error")).toHaveTextContent(/reset your password/i);
+		});
+
+		expect(screen.getByRole("link", { name: /reset password/i })).toBeInTheDocument();
+	});
+
 	it("handles generic server error by setting password error and clearing email error", async () => {
 		const fakeError = {
 			response: {

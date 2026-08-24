@@ -77,14 +77,29 @@ export default function SignInForm() {
 			onError: (error) => {
 				const axiosError = error as AxiosError<ILoginResponse>;
 				const messageCode = axiosError?.response?.data?.messageCode as string;
+				const serverMessage = axiosError.response?.data?.message;
 
 				if (messageCode === ERROR_CODES.USER_NOT_FOUND) {
 					form.setError("email", {
 						message: "User not found! Please check your email and try again.",
 					});
+				} else if (
+					messageCode === ERROR_CODES.ACCOUNT_LOCKED ||
+					messageCode === ERROR_CODES.ACCOUNT_LOCKED_RESET_REQUIRED
+				) {
+					// Account lockout is a form-level condition, not a per-field problem.
+					// Keep the fields clean (and the reset link visible) and surface a
+					// single message above the form.
+					form.setError("root", {
+						message:
+							serverMessage ||
+							(messageCode === ERROR_CODES.ACCOUNT_LOCKED_RESET_REQUIRED
+								? "Too many failed attempts. Reset your password to regain access."
+								: "Too many failed attempts. This account is temporarily locked. Please try again later."),
+					});
 				} else {
 					form.setError("password", {
-						message: axiosError.response?.data?.message || "Something went wrong!",
+						message: serverMessage || "Something went wrong!",
 					});
 					form.setError("email", {});
 				}
@@ -104,6 +119,11 @@ export default function SignInForm() {
 			/>
 
 			<form onSubmit={(event) => void form.handleSubmit(onSubmit)(event)} className="space-y-10 px-3">
+				{form.formState.errors.root?.message ? (
+					<p role="alert" className="text-sm font-normal text-red-600" data-testid="signin-form-error">
+						{form.formState.errors.root.message}
+					</p>
+				) : null}
 				<div className="space-y-4">
 					<FormInputWrapper
 						form={form}
