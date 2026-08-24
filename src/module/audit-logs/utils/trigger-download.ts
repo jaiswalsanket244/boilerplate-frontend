@@ -1,0 +1,9 @@
+export function triggerDownload(url: string): void {
+	const link = document.createElement("a");
+	link.href = url;
+	link.rel = "noopener";
+	link.style.visibility = "hidden";
+	document.body.appendChild(link);
+	link.click();
+	document.body.removeChild(link);
+}
