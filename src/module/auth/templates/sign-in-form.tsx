@@ -78,7 +78,18 @@ export default function SignInForm() {
 				const axiosError = error as AxiosError<ILoginResponse>;
 				const messageCode = axiosError?.response?.data?.messageCode as string;
 
-				if (messageCode === ERROR_CODES.USER_NOT_FOUND) {
+				if (messageCode === ERROR_CODES.ACCOUNT_LOCKED_RESET_REQUIRED) {
+					// Terminal lock — only a password reset clears it. Surface it at the
+					// form level (not the password field) and keep the reset link visible.
+					form.setError("root", {
+						message:
+							"Your account is locked due to too many failed attempts. Please reset your password to regain access.",
+					});
+				} else if (messageCode === ERROR_CODES.ACCOUNT_LOCKED) {
+					form.setError("root", {
+						message: "Too many failed attempts. Your account is temporarily locked. Please try again later.",
+					});
+				} else if (messageCode === ERROR_CODES.USER_NOT_FOUND) {
 					form.setError("email", {
 						message: "User not found! Please check your email and try again.",
 					});
@@ -131,6 +142,11 @@ export default function SignInForm() {
 							Reset Password
 						</Link>
 					</div>
+					{form.formState.errors.root?.message ? (
+						<p role="alert" className="text-sm font-normal text-red-600">
+							{form.formState.errors.root.message}
+						</p>
+					) : null}
 				</div>
 				<Button
 					className="w-full"

@@ -280,6 +280,52 @@ describe("SignInForm Template", () => {
 		});
 	});
 
+	it("shows a form-level message for a temporary account lock", async () => {
+		const fakeError = {
+			response: {
+				data: {
+					messageCode: "ACCOUNT_LOCKED",
+				},
+			},
+		};
+
+		mutateMock.mockImplementation((_payload, { onError }) => {
+			onError(fakeError);
+		});
+
+		renderComponent();
+
+		await submitForm(user, "user@x.test", "wrong");
+
+		await waitFor(() => {
+			expect(screen.getByText(/temporarily locked/i)).toBeInTheDocument();
+		});
+	});
+
+	it("prompts a password reset for a terminal account lock", async () => {
+		const fakeError = {
+			response: {
+				data: {
+					messageCode: "ACCOUNT_LOCKED_RESET_REQUIRED",
+				},
+			},
+		};
+
+		mutateMock.mockImplementation((_payload, { onError }) => {
+			onError(fakeError);
+		});
+
+		renderComponent();
+
+		await submitForm(user, "user@x.test", "wrong");
+
+		await waitFor(() => {
+			expect(screen.getByText(/reset your password to regain access/i)).toBeInTheDocument();
+		});
+		// The reset link stays available so the user can act on the message.
+		expect(screen.getByRole("link", { name: /reset password/i })).toBeInTheDocument();
+	});
+
 	it("handles generic server error by setting password error and clearing email error", async () => {
 		const fakeError = {
 			response: {
