@@ -302,6 +302,57 @@ describe("SignInForm Template", () => {
 		});
 	});
 
+	it("shows a form-level lock message and keeps the reset link when the account is locked", async () => {
+		const fakeError = {
+			response: {
+				data: {
+					messageCode: "ACCOUNT_LOCKED",
+					message: "Too many failed login attempts. Please try again in a few minutes.",
+				},
+			},
+		};
+
+		mutateMock.mockImplementation((_payload, { onError }) => {
+			onError(fakeError);
+		});
+
+		renderComponent();
+
+		await submitForm(user, "user@x.test", "wrong");
+
+		await waitFor(() => {
+			expect(screen.getByRole("alert")).toHaveTextContent(/too many failed login attempts/i);
+		});
+		// The reset link must remain reachable so the user can recover.
+		expect(screen.getByRole("link", { name: /reset password/i })).toHaveAttribute(
+			"href",
+			routes.auth.forgotPassword,
+		);
+	});
+
+	it("shows a form-level message when the lock requires a password reset", async () => {
+		const fakeError = {
+			response: {
+				data: {
+					messageCode: "ACCOUNT_LOCKED_RESET_REQUIRED",
+					message: "Your account is locked due to too many failed login attempts. Please reset your password to continue.",
+				},
+			},
+		};
+
+		mutateMock.mockImplementation((_payload, { onError }) => {
+			onError(fakeError);
+		});
+
+		renderComponent();
+
+		await submitForm(user, "user@x.test", "wrong");
+
+		await waitFor(() => {
+			expect(screen.getByRole("alert")).toHaveTextContent(/please reset your password/i);
+		});
+	});
+
 	it("falls back to generic error message when server message missing", async () => {
 		const fakeError = {
 			response: {

@@ -77,14 +77,24 @@ export default function SignInForm() {
 			onError: (error) => {
 				const axiosError = error as AxiosError<ILoginResponse>;
 				const messageCode = axiosError?.response?.data?.messageCode as string;
+				const serverMessage = axiosError.response?.data?.message;
 
 				if (messageCode === ERROR_CODES.USER_NOT_FOUND) {
 					form.setError("email", {
 						message: "User not found! Please check your email and try again.",
 					});
+				} else if (
+					messageCode === ERROR_CODES.ACCOUNT_LOCKED ||
+					messageCode === ERROR_CODES.ACCOUNT_LOCKED_RESET_REQUIRED
+				) {
+					// Lockout is a form-level condition, not a bad-field one — surface it
+					// on the form root so the reset link stays available beneath it.
+					form.setError("root", {
+						message: serverMessage || "Your account is temporarily locked. Please try again later.",
+					});
 				} else {
 					form.setError("password", {
-						message: axiosError.response?.data?.message || "Something went wrong!",
+						message: serverMessage || "Something went wrong!",
 					});
 					form.setError("email", {});
 				}
@@ -123,6 +133,11 @@ export default function SignInForm() {
 								: `${isRedirecting ? "input-field-success" : "input-field"} `
 						}
 					/>
+					{form.formState.errors.root?.message && (
+						<p role="alert" className="text-sm leading-5 font-normal text-red-600">
+							{form.formState.errors.root.message}
+						</p>
+					)}
 					<div className="flex-between">
 						<Link
 							href={routes.auth.forgotPassword}
