@@ -82,6 +82,16 @@ export default function SignInForm() {
 					form.setError("email", {
 						message: "User not found! Please check your email and try again.",
 					});
+				} else if (
+					messageCode === ERROR_CODES.ACCOUNT_LOCKED ||
+					messageCode === ERROR_CODES.ACCOUNT_LOCKED_RESET_REQUIRED
+				) {
+					// Account lockout is a form-level condition, not a bad-field error, so
+					// surface it as a root message and leave the reset link reachable.
+					form.setError("root", {
+						message:
+							axiosError.response?.data?.message || "Your account is locked due to too many failed login attempts.",
+					});
 				} else {
 					form.setError("password", {
 						message: axiosError.response?.data?.message || "Something went wrong!",
@@ -131,6 +141,11 @@ export default function SignInForm() {
 							Reset Password
 						</Link>
 					</div>
+					{form.formState.errors.root && (
+						<p role="alert" className="text-sm font-normal text-destructive">
+							{form.formState.errors.root.message}
+						</p>
+					)}
 				</div>
 				<Button
 					className="w-full"

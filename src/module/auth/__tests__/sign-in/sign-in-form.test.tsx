@@ -280,6 +280,32 @@ describe("SignInForm Template", () => {
 		});
 	});
 
+	it.each([
+		["ACCOUNT_LOCKED", "Your account is temporarily locked due to multiple failed login attempts."],
+		["ACCOUNT_LOCKED_RESET_REQUIRED", "Your account is locked after too many failed login attempts."],
+	])("shows a form-level message for %s while keeping the reset link visible", async (messageCode, message) => {
+		const fakeError = {
+			response: {
+				data: { messageCode, message },
+			},
+		};
+
+		mutateMock.mockImplementation((_payload, { onError }) => {
+			onError(fakeError);
+		});
+
+		renderComponent();
+
+		await submitForm(user, "locked@x.test", "wrong");
+
+		// Surfaced as a form-level alert (not a password-field error) with the
+		// reset link still reachable.
+		await waitFor(() => {
+			expect(screen.getByRole("alert")).toHaveTextContent(message);
+		});
+		expect(screen.getByRole("link", { name: /reset password/i })).toBeInTheDocument();
+	});
+
 	it("handles generic server error by setting password error and clearing email error", async () => {
 		const fakeError = {
 			response: {
