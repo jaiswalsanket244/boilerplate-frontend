@@ -1,9 +1,10 @@
+import type { IconType } from "react-icons";
+import * as z from "zod";
+
 import type { CompanyType } from "@/module/company/types";
 import type { IUser, USER_TYPE } from "@/types";
 import type { ApiResponse } from "@/types/api-response";
 import type { PERMISSIONS } from "@/types/permission";
-import type { IconType } from "react-icons";
-import * as z from "zod";
 
 export * from "@/module/profile/types/user-query";
 
@@ -103,16 +104,6 @@ export const cardFormSchema = z.object({
 	cvc: z.string().optional(),
 });
 export type CardFormTypes = z.infer<typeof cardFormSchema>;
-
-// form zod validation schema
-export const passwordFormSchema = z.object({
-	currentPassword: z.string().min(8, { message: "Current password is required" }),
-	newPassword: z.string().min(8, { message: "New password required" }),
-	confirmedPassword: z.string().min(8, { message: "Confirmed password required" }),
-});
-
-// generate form types from zod validation schema
-export type PasswordFormTypes = z.infer<typeof passwordFormSchema>;
 
 // form zod validation schema
 export const personalInfoFormSchema = z.object({

@@ -1,10 +1,10 @@
 import {
 	ChangePasswordSchema,
 	PasswordSchema,
+	hasLetter,
 	hasMinLength,
 	hasNumber,
 	hasSpecialChar,
-	hasUpperAndLower,
 } from "@/module/auth/utils/form-utils";
 
 const VALID_PASSWORD = "Passw0rd!";
@@ -13,21 +13,17 @@ const confirmPasswordIssue = (result: ReturnType<typeof PasswordSchema.safeParse
 	result.success ? undefined : result.error.issues.find((issue) => issue.path.includes("confirmPassword"));
 
 describe("form-utils password predicates", () => {
-	describe("hasUpperAndLower", () => {
-		it("rejects a password with no lowercase letter", () => {
-			expect(hasUpperAndLower("ALLUPPERCASE1!")).toBe(false);
-		});
-
-		it("rejects a password with no uppercase letter", () => {
-			expect(hasUpperAndLower("alllowercase1!")).toBe(false);
-		});
-
+	describe("hasLetter", () => {
 		it("rejects a password with no letters at all", () => {
-			expect(hasUpperAndLower("12345678!")).toBe(false);
+			expect(hasLetter("12345678!")).toBe(false);
 		});
 
-		it("accepts a password containing both cases", () => {
-			expect(hasUpperAndLower(VALID_PASSWORD)).toBe(true);
+		it("accepts a password with only lowercase letters", () => {
+			expect(hasLetter("alllowercase1!")).toBe(true);
+		});
+
+		it("accepts a password with only uppercase letters", () => {
+			expect(hasLetter("ALLUPPERCASE1!")).toBe(true);
 		});
 	});
 
@@ -57,9 +53,12 @@ describe("form-utils password predicates", () => {
 			expect(hasSpecialChar("Password1")).toBe(false);
 		});
 
-		it.each(["@", "$", "%", "*", "&", "?", "!"])("accepts %s as a special character", (char) => {
-			expect(hasSpecialChar(`Password1${char}`)).toBe(true);
-		});
+		it.each(["@", "$", "%", "*", "&", "?", "!", "#", "_", "-", "^", " "])(
+			"accepts %s as a special character",
+			(char) => {
+				expect(hasSpecialChar(`Password1${char}`)).toBe(true);
+			}
+		);
 	});
 });
 
@@ -103,7 +102,7 @@ describe("PasswordSchema", () => {
 
 	it.each([
 		["shorter than 8 characters", "Pw1!", "Password must be at least 8 characters"],
-		["missing a mixed case", "password1!", "Password must contain uppercase and lowercase letters"],
+		["missing a letter", "12345678!", "Password must contain at least one letter"],
 		["missing a number", "Password!", "Password must contain at least one number"],
 		["missing a special character", "Password1", "Password must contain at least one special character"],
 	])("rejects a password %s", (_label, password, message) => {
@@ -113,6 +112,16 @@ describe("PasswordSchema", () => {
 		if (!result.success) {
 			expect(result.error.issues.map((issue) => issue.message)).toContain(message);
 		}
+	});
+
+	it.each([
+		["a single-case letter password", "password1!"],
+		["a special char outside the old restricted set", "Password1#"],
+		["an underscore as the special char", "Password1_"],
+	])("accepts %s", (_label, password) => {
+		const result = PasswordSchema.safeParse({ password, confirmPassword: password });
+
+		expect(result.success).toBe(true);
 	});
 
 	it("requires confirmPassword to be non-empty", () => {

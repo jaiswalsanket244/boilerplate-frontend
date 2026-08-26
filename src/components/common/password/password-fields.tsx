@@ -1,15 +1,16 @@
+import { Check } from "lucide-react";
+import { useFormContext } from "react-hook-form";
+
 import { FormInputWrapper } from "@/components/common/form/form-input-wrapper";
 import { passwordFormFieldsConfig } from "@/components/common/password/form-fields-config";
 import CheckIcon from "@/components/shape/check-icon";
 import {
+	type PasswordFormData,
+	hasLetter,
 	hasMinLength,
 	hasNumber,
 	hasSpecialChar,
-	hasUpperAndLower,
-	type PasswordFormData,
 } from "@/module/auth/utils/form-utils";
-import { Check } from "lucide-react";
-import { useFormContext } from "react-hook-form";
 
 export default function PasswordFields() {
 	const form = useFormContext<PasswordFormData>();
@@ -18,7 +19,7 @@ export default function PasswordFields() {
 	const confirmPassword = form.watch("confirmPassword");
 
 	const goodPassword = () =>
-		hasMinLength(password) && hasUpperAndLower(password) && hasNumber(password) && hasSpecialChar(password);
+		hasMinLength(password) && hasLetter(password) && hasNumber(password) && hasSpecialChar(password);
 
 	return (
 		<>
@@ -32,16 +33,16 @@ export default function PasswordFields() {
 
 				{goodPassword() && (
 					<div className="mt-1 flex items-center gap-2">
-						<div className="bg-green rounded-full p-0.5">
+						<div className="rounded-full bg-green p-0.5">
 							<Check size={8} className="text-white" />
 						</div>
-						<p className="text-green text-xs">Password Strength: Good</p>
+						<p className="text-xs text-green">Password Strength: Good</p>
 					</div>
 				)}
 
 				<div className="mt-2 space-y-2 text-xs">
 					<PasswordRequirement valid={hasMinLength(password)} label="Minimum 8 characters" />
-					<PasswordRequirement valid={hasUpperAndLower(password)} label="Uppercase and lowercase" />
+					<PasswordRequirement valid={hasLetter(password)} label="At least one letter" />
 					<PasswordRequirement valid={hasNumber(password)} label="At least one number" />
 					<PasswordRequirement valid={hasSpecialChar(password)} label="At least one special character" />
 				</div>
@@ -56,8 +57,8 @@ export default function PasswordFields() {
 				/>
 
 				{goodPassword() && confirmPassword === password && (
-					<div className="text-green mt-1 flex items-center gap-2 text-xs">
-						<div className="bg-green rounded-full p-0.5">
+					<div className="mt-1 flex items-center gap-2 text-xs text-green">
+						<div className="rounded-full bg-green p-0.5">
 							<Check size={8} className="text-white" />
 						</div>
 						<p>Passwords match</p>
@@ -70,7 +71,7 @@ export default function PasswordFields() {
 
 function PasswordRequirement({ valid, label }: { valid: boolean; label: string }) {
 	return (
-		<div className="font-lato flex items-center">
+		<div className="flex items-center font-lato">
 			<div
 				className={`mr-2 flex h-4 w-4 items-center justify-center rounded-sm border ${
 					valid ? "bg-primary text-primary-foreground" : "border-border"
