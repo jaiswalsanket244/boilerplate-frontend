@@ -1,9 +1,10 @@
 import { z } from "zod";
 
+// Canonical password policy — mirrors boilerplate-backend/src/helpers/password-policy.ts exactly.
 export const hasMinLength = (password: string) => password.length >= 8;
-export const hasUpperAndLower = (password: string) => /[A-Z]/.test(password) && /[a-z]/.test(password);
-export const hasNumber = (password: string) => /\d/.test(password);
-export const hasSpecialChar = (password: string) => /[@$%*&?!]/.test(password);
+export const hasLetter = (password: string) => /[A-Za-z]/.test(password);
+export const hasNumber = (password: string) => /[0-9]/.test(password);
+export const hasSpecialChar = (password: string) => /[^A-Za-z0-9]/.test(password);
 
 const alphaOnlyRegex = /^[A-Za-z]+$/;
 const strictEmailRegex =
@@ -42,8 +43,8 @@ export const PasswordSchema = z
 		password: z
 			.string()
 			.min(8, { message: "Password must be at least 8 characters" })
-			.refine(hasUpperAndLower, {
-				message: "Password must contain uppercase and lowercase letters",
+			.refine(hasLetter, {
+				message: "Password must contain at least one letter",
 			})
 			.refine(hasNumber, {
 				message: "Password must contain at least one number",
@@ -65,8 +66,8 @@ export const ChangePasswordSchema = z
 		password: z
 			.string()
 			.min(8, { message: "Password must be at least 8 characters" })
-			.refine(hasUpperAndLower, {
-				message: "Password must contain uppercase and lowercase letters",
+			.refine(hasLetter, {
+				message: "Password must contain at least one letter",
 			})
 			.refine(hasNumber, {
 				message: "Password must contain at least one number",

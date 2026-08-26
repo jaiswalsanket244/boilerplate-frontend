@@ -41,7 +41,7 @@ describe("PasswordFields Component", () => {
 		renderComponent();
 
 		expect(screen.getByText(/minimum 8 characters/i)).toHaveClass("text-txt-secondary-800");
-		expect(screen.getByText(/uppercase and lowercase/i)).toHaveClass("text-txt-secondary-800");
+		expect(screen.getByText(/at least one letter/i)).toHaveClass("text-txt-secondary-800");
 		expect(screen.getByText(/at least one number/i)).toHaveClass("text-txt-secondary-800");
 		expect(screen.getByText(/at least one special character/i)).toHaveClass("text-txt-secondary-800");
 	});
@@ -54,7 +54,7 @@ describe("PasswordFields Component", () => {
 		await user.type(input, "Abc1234!");
 
 		expect(screen.getByText(/minimum 8 characters/i)).toHaveClass("text-green-600");
-		expect(screen.getByText(/uppercase and lowercase/i)).toHaveClass("text-green-600");
+		expect(screen.getByText(/at least one letter/i)).toHaveClass("text-green-600");
 		expect(screen.getByText(/at least one number/i)).toHaveClass("text-green-600");
 		expect(screen.getByText(/at least one special character/i)).toHaveClass("text-green-600");
 	});

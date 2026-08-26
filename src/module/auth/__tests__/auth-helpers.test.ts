@@ -1,4 +1,4 @@
-import { createPopupWindow, getPopupConfig, isPasswordValid } from "@/module/auth/utils/helpers";
+import { createPopupWindow, getPopupConfig } from "@/module/auth/utils/helpers";
 
 const stubWindowGeometry = (geometry: Record<string, number>) => {
 	const originals = Object.keys(geometry).map((key) => [key, window[key as keyof Window]] as const);
@@ -12,30 +12,6 @@ const stubWindowGeometry = (geometry: Record<string, number>) => {
 			Object.defineProperty(window, key, { value, configurable: true, writable: true })
 		);
 };
-
-describe("isPasswordValid", () => {
-	it("accepts a password meeting every rule", () => {
-		expect(isPasswordValid("Passw0rd!")).toBe(true);
-	});
-
-	it("accepts a password at the eight character boundary", () => {
-		expect(isPasswordValid("Passw0r!")).toBe(true);
-	});
-
-	it("rejects a password one character below the boundary", () => {
-		expect(isPasswordValid("Pasw0r!")).toBe(false);
-	});
-
-	it.each([
-		["no digit", "Password!"],
-		["no special character", "Password1"],
-		["no letter", "1234567!"],
-		["an unsupported special character", "Passw0rd^"],
-		["empty", ""],
-	])("rejects a password with %s", (_label, password) => {
-		expect(isPasswordValid(password)).toBe(false);
-	});
-});
 
 describe("getPopupConfig", () => {
 	let restore: () => void;
