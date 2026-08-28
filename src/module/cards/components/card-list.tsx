@@ -4,7 +4,6 @@ import { useCardsAPI } from "@/module/cards/hooks/useCards";
 import type { CardDetailsType } from "@/module/cards/types";
 import { Switch } from "@/components/ui/switch";
 import { useState } from "react";
-import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 import { MESSAGE_STATUS } from "@/types";
 import { StatusMessage } from "@/components/common/status-message/status-message";
 
