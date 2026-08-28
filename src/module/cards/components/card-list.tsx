@@ -1,12 +1,24 @@
 "use client";
 
-import { useCardsAPI } from "@/module/cards/hooks/useCards";
-import type { CardDetailsType } from "@/module/cards/types";
-import { Switch } from "@/components/ui/switch";
-import { useState } from "react";
 import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
-import { MESSAGE_STATUS } from "@/types";
+import { useState } from "react";
+
 import { StatusMessage } from "@/components/common/status-message/status-message";
+import { Switch } from "@/components/ui/switch";
+import { useCardsAPI } from "@/module/cards/hooks/useCards";
+import type { CardDetailsType, WalletType } from "@/module/cards/types";
+import { MESSAGE_STATUS } from "@/types";
+
+const getWalletLabel = (wallet: WalletType): string => {
+	switch (wallet.type) {
+		case "google_pay":
+			return "Google Pay";
+		case "apple_pay":
+			return "Apple Pay";
+		default:
+			return "Wallet";
+	}
+};
 
 export default function CardList() {
 	const { useGetCardsQuery, useSetDefaultCardMutation } = useCardsAPI();
@@ -56,27 +68,41 @@ export default function CardList() {
 				<p className="text-gray-500">No cards saved yet.</p>
 			) : (
 				<ul className="space-y-3">
-					{cards.map((card: CardDetailsType) => (
-						<li
-							key={card.id}
-							className={`flex items-center justify-between rounded-lg border p-4 shadow-xs ${
-								updatingCardId === card.id ? "opacity-60" : ""
-							}`}
-						>
-							<div>
-								<p className="font-medium capitalize">{card.card.brand}</p>
-								<p className="text-sm text-gray-500">**** **** **** {card.card.last4}</p>
-								<p className="text-xs text-gray-400">
-									Expires {card.card.exp_month}/{card.card.exp_year}
-								</p>
-							</div>
-							<Switch
-								checked={card.id === defaultCardId}
-								disabled={updatingCardId === card.id}
-								onCheckedChange={(checked) => handleSetDefault(card.id, checked)}
-							/>
-						</li>
-					))}
+					{cards.map((card: CardDetailsType) => {
+						const wallet = card.card.wallet;
+						// Wallet cards expose the tokenized device number in `last4`; the real
+						// funding card's digits live in `wallet.dynamic_last4`.
+						const displayLast4 = wallet?.dynamic_last4 ?? card.card.last4;
+
+						return (
+							<li
+								key={card.id}
+								className={`flex items-center justify-between rounded-lg border p-4 shadow-xs ${
+									updatingCardId === card.id ? "opacity-60" : ""
+								}`}
+							>
+								<div>
+									<div className="flex items-center gap-2">
+										<p className="font-medium capitalize">{card.card.brand}</p>
+										{wallet && (
+											<span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700">
+												{getWalletLabel(wallet)}
+											</span>
+										)}
+									</div>
+									<p className="text-sm text-gray-500">**** **** **** {displayLast4}</p>
+									<p className="text-xs text-gray-400">
+										Expires {card.card.exp_month}/{card.card.exp_year}
+									</p>
+								</div>
+								<Switch
+									checked={card.id === defaultCardId}
+									disabled={updatingCardId === card.id}
+									onCheckedChange={(checked) => handleSetDefault(card.id, checked)}
+								/>
+							</li>
+						);
+					})}
 				</ul>
 			)}
 		</div>

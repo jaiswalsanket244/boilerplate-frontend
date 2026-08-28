@@ -35,6 +35,13 @@ export type CardDetailsType = {
 	object: string;
 };
 
+export type WalletType = {
+	type: string;
+	dynamic_last4: string | null;
+	apple_pay?: object | null;
+	google_pay?: object | null;
+};
+
 export type CardType = {
 	brand: string;
 	last4: string;
@@ -57,7 +64,7 @@ export type CardType = {
 	three_d_secure_usage: {
 		supported: boolean;
 	};
-	wallet: string | null;
+	wallet: WalletType | null;
 	regulated_status: string | null;
 };
 
