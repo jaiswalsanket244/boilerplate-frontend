@@ -1,12 +1,13 @@
-import PreviousQueries from "@/module/profile/templates/previous-queries";
-import { mockGet } from "@/tests/utils/mock-api-client";
-import { renderWithProviders } from "@/tests/utils/mock-providers";
-import { USER_QUERY_STATUS, USER_QUERY_SUBJECT } from "@/module/profile/types";
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouterProvider } from "next-router-mock/MemoryRouterProvider";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
 import { getSessionStorage } from "@/lib/utils/session-storage";
+import PreviousQueries from "@/module/profile/templates/previous-queries";
+import { USER_QUERY_STATUS, USER_QUERY_SUBJECT } from "@/module/profile/types";
+import { mockGet } from "@/tests/utils/mock-api-client";
+import { renderWithProviders } from "@/tests/utils/mock-providers";
 
 // Mock session storage
 vi.mock("@/lib/utils/session-storage", () => ({
@@ -116,5 +117,47 @@ describe("PreviousQueries Template - Integration Tests", () => {
 		});
 
 		expect(screen.getByText("No Queries Found")).toBeInTheDocument();
+	});
+
+	it("should render the error state when the fetch fails", async () => {
+		mockGet.mockRejectedValue(new Error("Network error"));
+		renderComponent();
+
+		await waitFor(() => {
+			expect(screen.getByText("Failed to load queries. Please try again.")).toBeInTheDocument();
+		});
+
+		expect(screen.getByRole("button", { name: /try again/i })).toBeInTheDocument();
+	});
+
+	it("should not render the empty state when there is an error", async () => {
+		mockGet.mockRejectedValue(new Error("Network error"));
+		renderComponent();
+
+		await waitFor(() => {
+			expect(screen.getByText("Failed to load queries. Please try again.")).toBeInTheDocument();
+		});
+
+		expect(screen.queryByText("No Queries Found")).not.toBeInTheDocument();
+	});
+
+	it("should refetch and recover when Try again is clicked", async () => {
+		const user = userEvent.setup();
+		mockGet.mockRejectedValueOnce(new Error("Network error"));
+		renderComponent();
+
+		await waitFor(() => {
+			expect(screen.getByText("Failed to load queries. Please try again.")).toBeInTheDocument();
+		});
+
+		mockGet.mockResolvedValue(getQueriesResponse());
+		await user.click(screen.getByRole("button", { name: /try again/i }));
+
+		await waitFor(() => {
+			expect(screen.getByText("Query 1")).toBeInTheDocument();
+		});
+
+		expect(screen.queryByText("Failed to load queries. Please try again.")).not.toBeInTheDocument();
+		expect(screen.queryByText("No Queries Found")).not.toBeInTheDocument();
 	});
 });
