@@ -1,9 +1,10 @@
-import { apiClient } from "@/lib/api";
-import { useUserQueries } from "@/module/profile/hooks/useUserQueries";
-import { USER_QUERY_STATUS, USER_QUERY_SUBJECT, type IUserQuery } from "@/module/profile/types";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { apiClient } from "@/lib/api";
 import { wrapper } from "@/module/profile/__tests__/utils";
+import { useUserQueries } from "@/module/profile/hooks/useUserQueries";
+import { type IUserQuery, USER_QUERY_STATUS, USER_QUERY_SUBJECT } from "@/module/profile/types";
 
 const mockUserQuery: IUserQuery = {
 	_id: "query-123",
@@ -545,6 +546,82 @@ describe("useUserQueries hook", () => {
 			});
 
 			expect(result.current.searchTerm).toBe("test@example.com");
+		});
+
+		it("should collapse a burst of rapid search changes into a single debounced update", async () => {
+			vi.useFakeTimers({ shouldAdvanceTime: true });
+			vi.mocked(apiClient.get).mockResolvedValue(mockQueriesResponse);
+
+			const { result } = renderHook(() => useUserQueries(), { wrapper });
+
+			await waitFor(() => {
+				expect(result.current.isLoading).toBe(false);
+			});
+
+			// Each keystroke arrives before the 500ms window elapses, so the debounce keeps resetting.
+			const intermediateTerms = ["a", "ab", "abc", "abcd"];
+			for (const term of intermediateTerms) {
+				act(() => {
+					result.current.handleSearchChange(term);
+				});
+				act(() => {
+					vi.advanceTimersByTime(100);
+				});
+			}
+
+			act(() => {
+				result.current.handleSearchChange("abcde");
+			});
+
+			act(() => {
+				vi.advanceTimersByTime(500);
+			});
+
+			// Only the final term should ever reach a request; intermediate terms are collapsed away.
+			await waitFor(() => {
+				const urls = vi.mocked(apiClient.get).mock.calls.map((call) => call[0] as string);
+				expect(urls.some((url) => url.includes("search=abcde"))).toBe(true);
+			});
+
+			const searchUrls = vi.mocked(apiClient.get).mock.calls.map((call) => call[0] as string);
+			for (const term of intermediateTerms) {
+				expect(searchUrls.some((url) => url.includes(`search=${term}&`) || url.endsWith(`search=${term}`))).toBe(false);
+			}
+
+			vi.useRealTimers();
+		});
+
+		it("should not fire the debounced update after unmount", async () => {
+			vi.useFakeTimers({ shouldAdvanceTime: true });
+			const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+			vi.mocked(apiClient.get).mockResolvedValue(mockQueriesResponse);
+
+			const { result, unmount } = renderHook(() => useUserQueries(), { wrapper });
+
+			await waitFor(() => {
+				expect(result.current.isLoading).toBe(false);
+			});
+
+			act(() => {
+				result.current.handleSearchChange("unmount-term");
+			});
+
+			const callsBeforeUnmount = vi.mocked(apiClient.get).mock.calls.length;
+
+			// Unmount before the 500ms window elapses; the cleanup should cancel the pending timer.
+			unmount();
+
+			act(() => {
+				vi.advanceTimersByTime(500);
+			});
+
+			// No debounced state update fired, so no new request was made and no unmounted-update warning logged.
+			expect(vi.mocked(apiClient.get).mock.calls.length).toBe(callsBeforeUnmount);
+			const warned = consoleErrorSpy.mock.calls.some((call) => String(call[0]).includes("unmounted"));
+			expect(warned).toBe(false);
+
+			consoleErrorSpy.mockRestore();
+			vi.useRealTimers();
 		});
 	});
 
