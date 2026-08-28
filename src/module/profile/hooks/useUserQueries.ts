@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback } from "react";
-import type { FilterState, IPaginationState, IUseUserQueriesProps, TSortBy, TSortOrder } from "@/module/profile/types";
-import useUserQueryAPI from "@/module/profile/hooks/useUserQueryAPI";
-import { buildQueryString } from "@/module/profile/utils/helpers";
 import { debounce } from "lodash";
+import { useCallback, useEffect, useMemo, useState } from "react";
+
+import useUserQueryAPI from "@/module/profile/hooks/useUserQueryAPI";
+import type { FilterState, IPaginationState, IUseUserQueriesProps, TSortBy, TSortOrder } from "@/module/profile/types";
+import { buildQueryString } from "@/module/profile/utils/helpers";
 
 export const useUserQueries = ({ initialFilters = {}, pageSize = 15 }: IUseUserQueriesProps = {}) => {
 	const { useGetAllQueries } = useUserQueryAPI();
@@ -53,17 +54,29 @@ export const useUserQueries = ({ initialFilters = {}, pageSize = 15 }: IUseUserQ
 		setPagination((prev) => ({ ...prev, page: 1 }));
 	};
 
-	const debouncedSearchChange = debounce((term: string) => {
-		setDebouncedSearchTerm(term);
-	}, 500);
+	// Created once so a single pending timer exists at a time; recreating it per render
+	// would leak uncancelled timers that can fire after unmount.
+	const debouncedSearchChange = useMemo(
+		() =>
+			debounce((term: string) => {
+				setDebouncedSearchTerm(term);
+			}, 500),
+		[]
+	);
 
-	const handleSearchChange = useCallback((term: string) => {
-		setSearchTerm(term);
+	// Cancel the pending timer on unmount so no state update/request fires afterward.
+	useEffect(() => () => debouncedSearchChange.cancel(), [debouncedSearchChange]);
 
-		debouncedSearchChange(term);
+	const handleSearchChange = useCallback(
+		(term: string) => {
+			setSearchTerm(term);
 
-		setPagination((prev) => ({ ...prev, page: 1 }));
-	}, []);
+			debouncedSearchChange(term);
+
+			setPagination((prev) => ({ ...prev, page: 1 }));
+		},
+		[debouncedSearchChange]
+	);
 
 	const handleSortChange = (sortBy: TSortBy, sortOrder?: TSortOrder) => {
 		setFilters((prev) => {
