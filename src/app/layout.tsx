@@ -1,11 +1,15 @@
 import type { Metadata, Viewport } from "next";
+
 import "@/styles/globals.css";
-import { cn } from "@/lib/utils/class-names";
-import Provider from "@/components/providers/query-client-provider";
-import { Lato, Inter } from "next/font/google";
-import { ThemeProvider } from "@/components/providers/theme-provider";
-import OneSignalProvider from "@/components/providers/one-signal";
+
+import { Inter, Lato } from "next/font/google";
 import Script from "next/script";
+
+import MaintenanceBanner from "@/components/common/maintenance-banner/maintenance-banner";
+import OneSignalProvider from "@/components/providers/one-signal";
+import Provider from "@/components/providers/query-client-provider";
+import { ThemeProvider } from "@/components/providers/theme-provider";
+import { cn } from "@/lib/utils/class-names";
 
 const lato = Lato({
 	subsets: ["latin"],
@@ -35,6 +39,7 @@ export default function RootLayout({ children }: ChildProps) {
 			<body>
 				<Provider>
 					<ThemeProvider attribute="class" defaultTheme="system" enableSystem={false} disableTransitionOnChange>
+						<MaintenanceBanner />
 						{children}
 						<OneSignalProvider />
 					</ThemeProvider>
