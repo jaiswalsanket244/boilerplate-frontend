@@ -1,3 +1,5 @@
+import { useMutation, useQuery } from "@tanstack/react-query";
+
 import { apiClient } from "@/lib/api";
 import { getUserCookies } from "@/lib/utils/cookies";
 import type { CompanyType } from "@/module/company/types";
@@ -12,17 +14,15 @@ import type {
 	IGetPreferencesResponse,
 	IGetUserResponse,
 	IMarkAsReadResponse,
-	INotificationChannels,
 	IUnreadNotificationCountResponse,
 	IUpdateCompanyResponse,
-	NOTIFICATION_TYPES,
 	UpdateApiResponseType,
-	UpdatedProfileDataType,
+	UpdateNotificationPreferenceInput,
 	UpdateProfileByIdApiResponseType,
 	UpdateProfileByIdType,
+	UpdatedProfileDataType,
 } from "@/module/profile/types";
-import { ROLES, type IUser } from "@/types";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { type IUser, ROLES } from "@/types";
 
 export const shouldUseImpersonatedMenu = (user: IUser) => {
 	if (user.roles !== ROLES.SUPER_ADMIN || typeof window === "undefined") return false;
@@ -140,7 +140,7 @@ export const useProfileAPI = () => {
 
 	const useUpdateNotificationPreferences = () => {
 		return useMutation({
-			mutationFn: async (data: { type: NOTIFICATION_TYPES; channels: Partial<INotificationChannels> }) => {
+			mutationFn: async (data: UpdateNotificationPreferenceInput) => {
 				const response = await apiClient.put<IGetPreferencesResponse>("/notification/preferences", data);
 				return response.data;
 			},

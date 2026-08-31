@@ -1,8 +1,10 @@
-import { apiClient } from "@/lib/api";
-import { useProfileAPI } from "@/module/profile/hooks/useProfile";
 import { renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { apiClient } from "@/lib/api";
 import { mockUserData, wrapper } from "@/module/profile/__tests__/utils";
+import { useProfileAPI } from "@/module/profile/hooks/useProfile";
+import { DIGEST_FREQUENCY, NOTIFICATION_TYPES } from "@/module/profile/types";
 
 describe("useProfileAPI hook", () => {
 	beforeEach(() => {
@@ -375,6 +377,56 @@ describe("useProfileAPI hook", () => {
 					data: { supportEmail: "test@test.com" },
 				})
 			).rejects.toThrow();
+		});
+	});
+
+	describe("useUpdateNotificationPreferences", () => {
+		it("should send digest frequency in the PUT body", async () => {
+			vi.mocked(apiClient.put).mockResolvedValue({
+				data: { data: { preferences: {} } },
+			});
+
+			const { result } = renderHook(
+				() => {
+					const { useUpdateNotificationPreferences } = useProfileAPI();
+					return useUpdateNotificationPreferences();
+				},
+				{ wrapper }
+			);
+
+			await result.current.mutateAsync({
+				type: NOTIFICATION_TYPES.CHAT_MESSAGE,
+				digestFrequency: DIGEST_FREQUENCY.DAILY,
+			});
+
+			expect(apiClient.put).toHaveBeenCalledWith("/notification/preferences", {
+				type: NOTIFICATION_TYPES.CHAT_MESSAGE,
+				digestFrequency: DIGEST_FREQUENCY.DAILY,
+			});
+		});
+
+		it("should still send channel-only updates unchanged", async () => {
+			vi.mocked(apiClient.put).mockResolvedValue({
+				data: { data: { preferences: {} } },
+			});
+
+			const { result } = renderHook(
+				() => {
+					const { useUpdateNotificationPreferences } = useProfileAPI();
+					return useUpdateNotificationPreferences();
+				},
+				{ wrapper }
+			);
+
+			await result.current.mutateAsync({
+				type: NOTIFICATION_TYPES.PROFILE_AND_PASSWORD,
+				channels: { push: true },
+			});
+
+			expect(apiClient.put).toHaveBeenCalledWith("/notification/preferences", {
+				type: NOTIFICATION_TYPES.PROFILE_AND_PASSWORD,
+				channels: { push: true },
+			});
 		});
 	});
 });

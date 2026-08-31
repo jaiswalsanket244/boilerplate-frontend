@@ -1,9 +1,10 @@
+import type { IconType } from "react-icons";
+import * as z from "zod";
+
 import type { CompanyType } from "@/module/company/types";
 import type { IUser, USER_TYPE } from "@/types";
 import type { ApiResponse } from "@/types/api-response";
 import type { PERMISSIONS } from "@/types/permission";
-import type { IconType } from "react-icons";
-import * as z from "zod";
 
 export * from "@/module/profile/types/user-query";
 
@@ -228,15 +229,31 @@ export enum NOTIFICATION_TYPES {
 	PROFILE_AND_PASSWORD = "profile_and_password",
 }
 
+export enum DIGEST_FREQUENCY {
+	OFF = "off",
+	DAILY = "daily",
+	WEEKLY = "weekly",
+}
+
 export interface INotificationChannels {
 	[NOTIFICATION_CHANNELS.EMAIL]: boolean;
 	[NOTIFICATION_CHANNELS.PUSH]: boolean;
 	[NOTIFICATION_CHANNELS.IN_APP]: boolean;
 }
 
+export interface INotificationPreference extends INotificationChannels {
+	digestFrequency: DIGEST_FREQUENCY;
+}
+
 export interface IUserNotificationPreference {
 	userRef: string;
-	preferences: Record<NOTIFICATION_TYPES, INotificationChannels>;
+	preferences: Record<NOTIFICATION_TYPES, INotificationPreference>;
 	createdAt?: Date;
 	updatedAt?: Date;
 }
+
+export type UpdateNotificationPreferenceInput = {
+	type: NOTIFICATION_TYPES;
+	channels?: Partial<INotificationChannels>;
+	digestFrequency?: DIGEST_FREQUENCY;
+};

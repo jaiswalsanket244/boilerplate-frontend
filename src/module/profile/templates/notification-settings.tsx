@@ -1,13 +1,26 @@
 "use client";
 
+import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
+
 import { Card, CardContent } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { useProfileAPI } from "@/module/profile/hooks/useProfile";
-import { type IUserNotificationPreference, NOTIFICATION_CHANNELS, NOTIFICATION_TYPES } from "@/module/profile/types";
-import { Loader2 } from "lucide-react";
+import {
+	DIGEST_FREQUENCY,
+	type IUserNotificationPreference,
+	NOTIFICATION_CHANNELS,
+	NOTIFICATION_TYPES,
+} from "@/module/profile/types";
 import { getDefaultNotificationPreferences } from "@/module/profile/utils/helpers";
+
+const DIGEST_FREQUENCY_OPTIONS: { value: DIGEST_FREQUENCY; label: string }[] = [
+	{ value: DIGEST_FREQUENCY.OFF, label: "Off" },
+	{ value: DIGEST_FREQUENCY.DAILY, label: "Daily" },
+	{ value: DIGEST_FREQUENCY.WEEKLY, label: "Weekly" },
+];
 
 const notificationSettings = [
 	{
@@ -75,6 +88,42 @@ const NotificationSettings = () => {
 		);
 	};
 
+	const handleFrequencyChange = (type: NOTIFICATION_TYPES, frequency: DIGEST_FREQUENCY) => {
+		if (updateMutation.isPending) return;
+
+		const previousValue = localPrefs?.[type]?.digestFrequency ?? DIGEST_FREQUENCY.OFF;
+		if (frequency === previousValue) return;
+
+		setLocalPrefs((prev) => ({
+			...prev,
+			[type]: {
+				...prev?.[type],
+				digestFrequency: frequency,
+			},
+		}));
+
+		updateMutation.mutate(
+			{
+				type,
+				digestFrequency: frequency,
+			},
+			{
+				onSuccess: () => {
+					void refetch();
+				},
+				onError: () => {
+					setLocalPrefs((prev) => ({
+						...prev,
+						[type]: {
+							...prev?.[type],
+							digestFrequency: previousValue,
+						},
+					}));
+				},
+			}
+		);
+	};
+
 	if (isLoading) {
 		return (
 			<div className="flex h-40 items-center justify-center">
@@ -84,12 +133,12 @@ const NotificationSettings = () => {
 	}
 
 	return (
-		<div className="mx-auto h-full max-w-4xl flex-1 overflow-y-auto pb-10 pr-5">
+		<div className="mx-auto h-full max-w-4xl flex-1 overflow-y-auto pr-5 pb-10">
 			<div className="mb-6">
 				<h1 className="text-xl font-semibold text-txt-primary-900">Notification Settings</h1>
 			</div>
 
-			<div className="flex flex-col space-y-1.5 p-6 pl-0 pt-0">
+			<div className="flex flex-col space-y-1.5 p-6 pt-0 pl-0">
 				<h3 className="text-text-primary-900 text-lg font-semibold">Push Notification Preferences</h3>
 				<p className="text-sm text-txt-secondary-700">Manage alerts sent directly to your browser or mobile app.</p>
 			</div>
@@ -103,11 +152,28 @@ const NotificationSettings = () => {
 									<h3 className="text-sm font-medium text-txt-primary">{item.label}</h3>
 									<p className="mt-0.5 text-sm text-txt-secondary-600">{item.description}</p>
 								</div>
-								<Switch
-									className="mt-1"
-									checked={!!localPrefs?.[item.type]?.[item.channel]}
-									onCheckedChange={() => handleToggle(item.type, item.channel)}
-								/>
+								<div className="flex items-center gap-4">
+									<Select
+										value={localPrefs?.[item.type]?.digestFrequency ?? DIGEST_FREQUENCY.OFF}
+										onValueChange={(value) => handleFrequencyChange(item.type, value as DIGEST_FREQUENCY)}
+									>
+										<SelectTrigger aria-label={`${item.label} digest frequency`} className="mt-1 w-32 bg-background">
+											<SelectValue />
+										</SelectTrigger>
+										<SelectContent>
+											{DIGEST_FREQUENCY_OPTIONS.map((option) => (
+												<SelectItem key={option.value} value={option.value}>
+													{option.label}
+												</SelectItem>
+											))}
+										</SelectContent>
+									</Select>
+									<Switch
+										className="mt-1"
+										checked={!!localPrefs?.[item.type]?.[item.channel]}
+										onCheckedChange={() => handleToggle(item.type, item.channel)}
+									/>
+								</div>
 							</div>
 
 							{index < notificationSettings.length - 1 && <Separator />}

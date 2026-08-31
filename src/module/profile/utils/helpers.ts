@@ -1,10 +1,11 @@
 import {
-	type INotificationChannels,
+	DIGEST_FREQUENCY,
+	type FilterState,
+	type INotificationPreference,
 	NOTIFICATION_CHANNELS,
 	NOTIFICATION_TYPES,
-	USER_QUERY_STATUS,
-	type FilterState,
 	type TSortBy,
+	USER_QUERY_STATUS,
 } from "@/module/profile/types";
 
 export const getStatusStyles = (status: string) => {
@@ -153,19 +154,20 @@ export const parseQueryString = (
 	return result;
 };
 
-export const getDefaultNotificationPreferences = (): Record<NOTIFICATION_TYPES, INotificationChannels> => {
-	const channels = {
+export const getDefaultNotificationPreferences = (): Record<NOTIFICATION_TYPES, INotificationPreference> => {
+	const preference = {
 		[NOTIFICATION_CHANNELS.PUSH]: false,
 		[NOTIFICATION_CHANNELS.EMAIL]: false,
 		[NOTIFICATION_CHANNELS.IN_APP]: false,
+		digestFrequency: DIGEST_FREQUENCY.OFF,
 	};
 
 	const defaults = Object.values(NOTIFICATION_TYPES).reduce(
 		(acc, type) => {
-			acc[type] = { ...channels };
+			acc[type] = { ...preference };
 			return acc;
 		},
-		{} as Record<NOTIFICATION_TYPES, INotificationChannels>
+		{} as Record<NOTIFICATION_TYPES, INotificationPreference>
 	);
 
 	return defaults;
