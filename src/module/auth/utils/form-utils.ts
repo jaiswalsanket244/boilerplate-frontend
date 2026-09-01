@@ -1,6 +1,9 @@
 import { z } from "zod";
 
-export const hasMinLength = (password: string) => password.length >= 8;
+// Single source of truth for the frontend password policy; must match the backend passwordSchema.
+export const PASSWORD_MIN_LENGTH = 8;
+
+export const hasMinLength = (password: string) => password.length >= PASSWORD_MIN_LENGTH;
 export const hasUpperAndLower = (password: string) => /[A-Z]/.test(password) && /[a-z]/.test(password);
 export const hasNumber = (password: string) => /\d/.test(password);
 export const hasSpecialChar = (password: string) => /[@$%*&?!]/.test(password);
@@ -41,7 +44,7 @@ export const PasswordSchema = z
 	.object({
 		password: z
 			.string()
-			.min(8, { message: "Password must be at least 8 characters" })
+			.min(PASSWORD_MIN_LENGTH, { message: `Password must be at least ${PASSWORD_MIN_LENGTH} characters` })
 			.refine(hasUpperAndLower, {
 				message: "Password must contain uppercase and lowercase letters",
 			})
@@ -64,7 +67,7 @@ export const ChangePasswordSchema = z
 		currentPassword: z.string().min(1, { message: "Current password is required" }),
 		password: z
 			.string()
-			.min(8, { message: "Password must be at least 8 characters" })
+			.min(PASSWORD_MIN_LENGTH, { message: `Password must be at least ${PASSWORD_MIN_LENGTH} characters` })
 			.refine(hasUpperAndLower, {
 				message: "Password must contain uppercase and lowercase letters",
 			})
