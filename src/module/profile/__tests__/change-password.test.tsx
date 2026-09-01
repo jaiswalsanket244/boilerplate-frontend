@@ -3,12 +3,11 @@ import userEvent, { type UserEvent } from "@testing-library/user-event";
 import type { AxiosError } from "axios";
 import { vi } from "vitest";
 
-import { renderWithProviders } from "@/tests/utils/mock-providers";
-
 import { apiClient } from "@/lib/api";
 import { ERROR_CODES } from "@/lib/constants/error-codes";
 import { mockUserData } from "@/module/profile/__tests__/utils";
 import ChangePassword from "@/module/profile/templates/change-password";
+import { renderWithProviders } from "@/tests/utils/mock-providers";
 
 const mockChangePasswordMutate = vi.fn();
 let isPending = false;
@@ -108,6 +107,28 @@ describe("ChangePassword Component", () => {
 			await user.click(submitButton);
 
 			expect(apiClient.post).not.toHaveBeenCalled();
+		});
+
+		// Guards the closed character-mix gap: the profile flow previously used a
+		// min(8)-only schema that silently bypassed these strength requirements.
+		it.each([
+			["Password1", /must contain at least one special character/i],
+			["password1!", /must contain uppercase and lowercase letters/i],
+			["Password!", /must contain at least one number/i],
+			["Pw1!", /must be at least 8 characters/i],
+		])("rejects a new password (%s) missing a requirement before submit", async (weakPassword, errorPattern) => {
+			renderComponent();
+
+			await user.type(screen.getByLabelText("Current Password"), "OldPass1!");
+			await user.type(screen.getByLabelText("Password"), weakPassword);
+			await user.type(screen.getByLabelText("Confirm Password"), weakPassword);
+
+			await user.click(getSubmitButton());
+
+			await waitFor(() => {
+				expect(screen.getByText(errorPattern)).toBeInTheDocument();
+			});
+			expect(mockChangePasswordMutate).not.toHaveBeenCalled();
 		});
 	});
 
