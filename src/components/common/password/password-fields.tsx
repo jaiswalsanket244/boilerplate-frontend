@@ -4,6 +4,9 @@ import { useFormContext } from "react-hook-form";
 import { FormInputWrapper } from "@/components/common/form/form-input-wrapper";
 import { passwordFormFieldsConfig } from "@/components/common/password/form-fields-config";
 import CheckIcon from "@/components/shape/check-icon";
+// Password rules now come from the single source of truth in password-policy so the
+// frontend checklist/predicates stay byte-identical to the backend policy (CYR-83),
+// instead of the previously duplicated/hardcoded values in auth's form-utils.
 import {
 	PASSWORD_REQUIREMENTS,
 	hasMinLength,
