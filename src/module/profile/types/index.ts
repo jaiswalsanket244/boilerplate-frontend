@@ -1,9 +1,10 @@
+import type { IconType } from "react-icons";
+import * as z from "zod";
+
 import type { CompanyType } from "@/module/company/types";
 import type { IUser, USER_TYPE } from "@/types";
 import type { ApiResponse } from "@/types/api-response";
 import type { PERMISSIONS } from "@/types/permission";
-import type { IconType } from "react-icons";
-import * as z from "zod";
 
 export * from "@/module/profile/types/user-query";
 
@@ -104,15 +105,11 @@ export const cardFormSchema = z.object({
 });
 export type CardFormTypes = z.infer<typeof cardFormSchema>;
 
-// form zod validation schema
-export const passwordFormSchema = z.object({
-	currentPassword: z.string().min(8, { message: "Current password is required" }),
-	newPassword: z.string().min(8, { message: "New password required" }),
-	confirmedPassword: z.string().min(8, { message: "Confirmed password required" }),
-});
-
-// generate form types from zod validation schema
-export type PasswordFormTypes = z.infer<typeof passwordFormSchema>;
+// Profile change-password is governed by the canonical ChangePasswordSchema
+// (src/module/auth/utils/form-utils.ts); re-exported here so the full strong
+// policy is the single source of truth for this flow.
+export { ChangePasswordSchema as passwordFormSchema } from "@/module/auth/utils/form-utils";
+export type { ChangePasswordFormType as PasswordFormTypes } from "@/module/auth/utils/form-utils";
 
 // form zod validation schema
 export const personalInfoFormSchema = z.object({

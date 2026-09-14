@@ -1,9 +1,8 @@
 import { z } from "zod";
 
-export const hasMinLength = (password: string) => password.length >= 8;
-export const hasUpperAndLower = (password: string) => /[A-Z]/.test(password) && /[a-z]/.test(password);
-export const hasNumber = (password: string) => /\d/.test(password);
-export const hasSpecialChar = (password: string) => /[@$%*&?!]/.test(password);
+import { strongPasswordSchema } from "@/lib/constants/password-policy";
+
+export { hasMinLength, hasNumber, hasSpecialChar, hasUpperAndLower } from "@/lib/constants/password-policy";
 
 const alphaOnlyRegex = /^[A-Za-z]+$/;
 const strictEmailRegex =
@@ -39,18 +38,7 @@ export type LoginFormData = z.infer<typeof loginSchema>;
 
 export const PasswordSchema = z
 	.object({
-		password: z
-			.string()
-			.min(8, { message: "Password must be at least 8 characters" })
-			.refine(hasUpperAndLower, {
-				message: "Password must contain uppercase and lowercase letters",
-			})
-			.refine(hasNumber, {
-				message: "Password must contain at least one number",
-			})
-			.refine(hasSpecialChar, {
-				message: "Password must contain at least one special character",
-			}),
+		password: strongPasswordSchema,
 		confirmPassword: z.string().min(1, { message: "Please confirm your password" }),
 	})
 	.refine((data) => data.password === data.confirmPassword, {
@@ -62,18 +50,7 @@ export type PasswordFormData = z.infer<typeof PasswordSchema>;
 export const ChangePasswordSchema = z
 	.object({
 		currentPassword: z.string().min(1, { message: "Current password is required" }),
-		password: z
-			.string()
-			.min(8, { message: "Password must be at least 8 characters" })
-			.refine(hasUpperAndLower, {
-				message: "Password must contain uppercase and lowercase letters",
-			})
-			.refine(hasNumber, {
-				message: "Password must contain at least one number",
-			})
-			.refine(hasSpecialChar, {
-				message: "Password must contain at least one special character",
-			}),
+		password: strongPasswordSchema,
 		confirmPassword: z.string().min(1, { message: "Please confirm your password" }),
 	})
 	.refine((data) => data.password === data.confirmPassword, {
