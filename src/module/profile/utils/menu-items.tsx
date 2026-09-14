@@ -1,7 +1,14 @@
-import { routes } from "@/config/routes";
-import type { MenuItem } from "@/module/profile/types";
-import { PERMISSIONS } from "@/types/permission";
-import { AlertTriangle, BellIcon, Briefcase, Building, Mail, Package2Icon, ShieldCheck, UserCog } from "lucide-react";
+import {
+	AlertTriangle,
+	BellIcon,
+	Briefcase,
+	Building,
+	Mail,
+	MonitorSmartphone,
+	Package2Icon,
+	ShieldCheck,
+	UserCog,
+} from "lucide-react";
 import { AiOutlineSetting } from "react-icons/ai";
 import { BsBoxSeam, BsQuestionSquareFill } from "react-icons/bs";
 import { HiOutlineUserGroup } from "react-icons/hi2";
@@ -10,6 +17,10 @@ import { PiChatTeardropText, PiUserSwitch } from "react-icons/pi";
 import { RxDashboard } from "react-icons/rx";
 import { TbReceiptDollar } from "react-icons/tb";
 import { VscLink } from "react-icons/vsc";
+
+import { routes } from "@/config/routes";
+import type { MenuItem } from "@/module/profile/types";
+import { PERMISSIONS } from "@/types/permission";
 
 export const isRouteActive = (pathname: string, href: string) => pathname === href;
 export const isSubMenuActive = (pathname: string, subs?: MenuItem[]) => subs?.some((s) => pathname === s.href);
@@ -40,6 +51,11 @@ export const settingsMenuItems: MenuItem[] = [
 		name: "Notifications",
 		href: routes.settings.notifications,
 		Icon: <BellIcon className="h-5 w-5" />,
+	},
+	{
+		name: "Sessions",
+		href: routes.settings.sessions,
+		Icon: <MonitorSmartphone className="h-5 w-5" />,
 	},
 	{
 		name: "Contact Us",
