@@ -1,11 +1,13 @@
+import type { IconType } from "react-icons";
+import * as z from "zod";
+
 import type { CompanyType } from "@/module/company/types";
 import type { IUser, USER_TYPE } from "@/types";
 import type { ApiResponse } from "@/types/api-response";
 import type { PERMISSIONS } from "@/types/permission";
-import type { IconType } from "react-icons";
-import * as z from "zod";
 
 export * from "@/module/profile/types/user-query";
+export * from "@/module/profile/types/sessions";
 
 export type ChangePasswordApiResponseType = {
 	status: number;

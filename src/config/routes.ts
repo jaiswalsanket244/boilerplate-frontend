@@ -104,6 +104,7 @@ export const routes = {
 		faqs: "/settings/faqs",
 		contactUs: "/settings/contact-us",
 		notifications: "/settings/notifications",
+		sessions: "/settings/sessions",
 		previousQueries: "/settings/contact-us/queries",
 	},
 };
