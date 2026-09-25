@@ -168,7 +168,7 @@ export default function ProductDialog({ id, product, open, onOpenChange, refetch
 						/>
 					</FormFieldWithError>
 
-					<FormFieldWithError label="Sale Price" error={errors.salePrice} testId="sale-price-field">
+					<FormFieldWithError label="Discounted Price" error={errors.salePrice} testId="sale-price-field">
 						<Input
 							type="number"
 							step="0.01"
