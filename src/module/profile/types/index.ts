@@ -204,7 +204,7 @@ export interface INotification {
 	_id: string;
 	title: string;
 	userRef: string;
-	isOpened: boolean;
+	isRead: boolean;
 	message: string;
 	redirectUrl?: string;
 	createdAt: Date;
