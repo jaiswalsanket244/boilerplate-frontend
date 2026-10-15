@@ -8,3 +8,4 @@ test: Runs the Vitest unit test suite once (`vitest run`).
 test:watch: Runs Vitest in watch mode, re-running tests on changes (`vitest`).
 test:e2e: Runs the Playwright end-to-end tests (`playwright test`).
 postbuild: After `build`, copies `public` and `.next/static` into `.next/standalone` for standalone deployment.
+T5 marker
