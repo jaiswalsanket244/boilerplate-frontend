@@ -95,7 +95,7 @@ export default function SignInForm() {
 	return (
 		<AuthLayout type={AUTH_PAGE_TYPE.SIGN_IN} showSocialAuth>
 			<AuthHeader
-				title="Sign In"
+				title="Welcome back"
 				description="Want to skip using a password?"
 				linkText="Sign In with Magic Link"
 				linkHref={routes.auth.requestLoginMagicLink}
