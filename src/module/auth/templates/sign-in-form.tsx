@@ -96,7 +96,7 @@ export default function SignInForm() {
 		<AuthLayout type={AUTH_PAGE_TYPE.SIGN_IN} showSocialAuth>
 			<AuthHeader
 				title="Welcome sanket"
-				description="Second change works"
+				description="Third change works"
 				linkText="Sign In with Magic Link"
 				linkHref={routes.auth.requestLoginMagicLink}
 				secondLinkText="Sign In with OTP"
