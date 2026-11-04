@@ -1,11 +1,11 @@
 "use client";
 
-import AdminDashboard from "@/module/admin-dashboard/templates/adminDashboard";
 import { canAccess } from "@/lib/utils/access-check";
-import { PERMISSIONS } from "@/types/permission";
+import AdminDashboard from "@/module/admin-dashboard/templates/adminDashboard";
 import { useProfileAPI } from "@/module/profile/hooks/useProfile";
+import { PERMISSIONS } from "@/types/permission";
 
-export default function DashboardPage() {
+function DashboardContent() {
 	const { useGetUserData } = useProfileAPI();
 	const { data: user } = useGetUserData();
 	const permissions = user?.permissions ?? [];
@@ -24,4 +24,13 @@ export default function DashboardPage() {
 	}
 
 	return <h1>No Access</h1>;
+}
+
+export default function DashboardPage() {
+	return (
+		<>
+			<DashboardContent />
+			<p className="mt-auto pt-4 text-xs text-foreground">Single comment test</p>
+		</>
+	);
 }
