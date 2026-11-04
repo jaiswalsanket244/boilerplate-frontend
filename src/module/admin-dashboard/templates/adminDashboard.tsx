@@ -25,7 +25,7 @@ export default function AdminDashboard() {
 				<div className="flex items-center justify-between">
 					<h2 className="text-lg font-semibold text-foreground">User Growth and Activity</h2>
 				</div>
-				<p className="text-foreground">Welcome to the preview test</p>
+				<p className="text-foreground">Second change works</p>
 			</div>
 
 			{/* Stats Cards */}

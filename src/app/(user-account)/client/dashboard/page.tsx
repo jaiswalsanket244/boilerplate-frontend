@@ -23,7 +23,7 @@ export default function DashboardPage() {
 		return (
 			<>
 				<h1>This is User dashboard</h1>
-				<p>Welcome to the preview test</p>
+				<p>Second change works</p>
 			</>
 		);
 	}
