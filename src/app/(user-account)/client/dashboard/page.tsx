@@ -20,7 +20,12 @@ export default function DashboardPage() {
 	const hasUserAccess = canAccess(permissions, PERMISSIONS.DASHBOARD_VIEW, true);
 
 	if (hasUserAccess) {
-		return <h1>This is User dashboard</h1>;
+		return (
+			<>
+				<h1>This is User dashboard</h1>
+				<p>Third change works</p>
+			</>
+		);
 	}
 
 	return <h1>No Access</h1>;

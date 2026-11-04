@@ -21,8 +21,11 @@ export default function AdminDashboard() {
 	return (
 		<div className="space-y-2">
 			{/* Header */}
-			<div className="mb-4 flex items-center justify-between">
-				<h2 className="text-lg font-semibold text-foreground">User Growth and Activity</h2>
+			<div className="mb-4">
+				<div className="flex items-center justify-between">
+					<h2 className="text-lg font-semibold text-foreground">User Growth and Activity</h2>
+				</div>
+				<p className="text-foreground">Third change works</p>
 			</div>
 
 			{/* Stats Cards */}
