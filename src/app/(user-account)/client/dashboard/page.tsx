@@ -5,7 +5,7 @@ import AdminDashboard from "@/module/admin-dashboard/templates/adminDashboard";
 import { useProfileAPI } from "@/module/profile/hooks/useProfile";
 import { PERMISSIONS } from "@/types/permission";
 
-const DashboardFooterNote = () => <p className="mt-auto pt-4 text-sm text-foreground">Single comment test</p>;
+const DashboardFooterNote = () => <p className="mt-auto pt-4 text-sm text-foreground">Single comment test 2</p>;
 
 export default function DashboardPage() {
 	const { useGetUserData } = useProfileAPI();
