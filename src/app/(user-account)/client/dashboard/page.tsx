@@ -30,7 +30,7 @@ export default function DashboardPage() {
 	return (
 		<>
 			<DashboardContent />
-			<p className="mt-auto pt-4 text-xs text-foreground">Single comment test</p>
+			<p className="mt-auto pt-4 text-xs text-foreground">Single comment test 2</p>
 		</>
 	);
 }
